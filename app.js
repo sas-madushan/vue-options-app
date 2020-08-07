@@ -124,6 +124,12 @@ Vue.component('app-root', {
         }
     },
     methods: {
+        removeAllOptions: function () {
+            this.options = []
+        },
+        removeOptionItem: function (removeId) {
+            this.options = this.options.filter(({ id }) => id !== removeId)
+        },
         addNewOption: function (option) {
             // validation
             if (!option) {
