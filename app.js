@@ -1,188 +1,143 @@
-// error message component
-Vue.component('error-message', {
-    props: {
-        message: {
-            type: [String, undefined]
-        }
-    },
-    template: `<span>{{message}}</span>`
-});
-
-// add option form component
+// Add option component
 Vue.component('add-option', {
     props: {
-        text: {
-            type: [String]
-        },
         addNewOption: {
-            type: [Function]
+            type: [Function],
+            required: true
+        }
+    },
+    template: `
+        <form v-on:submit.prevent="handleSubmitForm">
+            <input type="text" :value="defaultOption" @input="handleOnChange($event.target.value)"/>
+            <button>Add Option</button>
+        </form>
+    `,
+    data: function () {
+        return {
+            option: '',
+            error: undefined
         }
     },
     computed: {
-
+        defaultOption: function () {
+            return this.option = ''
+        }
     },
-    template: `
-        <form v-on:submit.prevent="addNewOption">
-            <input type="text" v-model="text" />
-            <button>Add Option</button>
-        </form>
-    `
+    methods: {
+        handleOnChange: function (e) {
+            const optionValue = e;
+            this.option = optionValue;
+        },
+        handleSubmitForm: function (e) {
+            e.preventDefault();
+            this.error = this.addNewOption(this.option)
+            return this.option = ''
+        }
+    }
 });
 
-// option item component
+// Option item component
 Vue.component('option-item', {
     props: {
-        text: {
-            type: [String]
-        },
-        deleteOption: {
-            type: [Function]
+        item: {
+            type: [Object],
+            required: true
         }
     },
     template: `
         <li>
-            <p>{{ text }}</p>
-            <button v-on:click="deleteOption(text)">Remove</button>
+            <p>{{ item.text }}</p>
+            <button>Remove</button>
         </li>
     `
 });
 
-// options component
-Vue.component('options', {
+// Options component
+Vue.component('options-view', {
     props: {
-        list: {
-            type: [Array]
-        },
-        removeAllOptions: {
-            type: [Function]
-        },
-        removeOptionItem: {
-            type: [Function]
+        options: {
+            type: [Array],
+            required: true,
         }
     },
     template: `
         <div>
-            <div>
-                <h3></h3>
-                <button v-on:click="removeAllOptions">Remove All</button>
-            </div>
-            <div>
-                <span v-if="list.length === 0">Please add an option to get started!</span>
-            </div>
             <ul>
                 <option-item 
-                    v-for="item in list" 
-                    v-bind:key="item.id"
-                    v-bind:text="item.text"
-                    v-bind:deleteOption="removeOptionItem"
+                    v-for="option in options"
+                    v-bind:key="option.id"
+                    v-bind:item="option"
                 >
                 </option-item>
             </ul>
         </div>
     `
-})
+});
 
-// header component
+// Header component
 Vue.component('header-view', {
-    template: `
-        <div>
-            <h1>Indecision App</h1>
-            <h5>Put your life in the hands of a computer.</h5>
-        </div>
-    `
-})
-
-// app root component
-Vue.component('app-root', {
     props: {
-        options: {
-            type: [Array]
+        title: {
+            type: [String],
+            required: true
         },
-        removeAllOptions: {
-            type: [Function]
-        },
-        removeOptionItem: {
-            type: [Function]
-        },
-        optionText: {
-            type: [String]
-        },
-        message: {
-            type: [String, undefined]
-        },
-        addNewOption: {
-            type: [Function]
+        subTitle: {
+            type: [String],
+            required: false
         }
     },
     template: `
         <div>
-            <header-view></header-view>
-            <div>
-                <options 
-                    v-bind:list="options"
-                    v-bind:removeAllOptions="removeAllOptions"
-                    v-bind:removeOptionItem="removeOptionItem"
-                >
-                </options>
-            </div>
-            <div>
-                <error-message v-bind:message="message"></error-message>
-                <add-option
-                    v-bind:text="optionText"
-                    v-bind:addNewOption="addNewOption"
-                ></add-option>
-            </div>
+            <h1>{{ title }}</h1>
+            <h4>{{ subTitle }}</h4>
         </div>
     `
 });
 
-// app root provider
-const root = new Vue({
-    el: '#root',
+// App root component
+Vue.component('app-root', {
     template: `
-        <app-root 
-            v-bind:options="options"
-            v-bind:removeAllOptions="removeAllOptions"
-            v-bind:removeOptionItem="removeOptionItem"
-            v-bind:message="error"
-            v-bind:optionText="optionText"
-            v-bind:addNewOption="addNewOption"
-        >
-        </app-root>
+        <div>
+            <header-view
+                title="Indecision App"
+                subTitle="Put your life in the hands of a computer."
+            ></header-view>
+            <div>
+                <options-view 
+                    v-bind:options="options"
+                    >
+                </options-view>
+            </div>
+            <div>
+                <add-option
+                    v-bind:addNewOption="addNewOption"
+                ></add-option>
+            </div>
+        </div>
     `,
-    data: {
-        options: [
-            { id: uuidv4(), text: 'Option One' }, // default values
-            { id: uuidv4(), text: 'Option Two' },
-        ],
-        optionText: '',
-        error: undefined
+    data: function () {
+        return {
+            options: [
+                { id: uuidv4(), text: 'Option One' },
+                { id: uuidv4(), text: 'Option Two' },
+            ]
+        }
     },
     methods: {
-        // remove option array
-        removeAllOptions: function () {
-            this.options = []
-        },
-        // remove single option item
-        removeOptionItem: function (removeText) {
-            this.options = this.options.filter(({ text }) => text !== removeText)
-        },
-        // add new item to options
-        addNewOption: function (e) {
-            e.preventDefault();
-
-            // set option - text value
-            const option = this.optionText;
-            // check has option empty
+        addNewOption: function (option) {
+            // validation
             if (!option) {
-                // set error -msg
-                this.error = 'Enter valid value to add item.'
-            } else {
-                // add new option - (reset error default)
-                this.error = undefined
-                this.options = this.options.concat({ id: uuidv4(), text: this.optionText })
+                return 'Enter valid value to add item.'
+            } else if (this.options.indexOf(option) > -1) {
+                return 'The item already exists.'
             }
 
+            this.options = this.options.concat({ id: uuidv4(), text: option })
         }
     }
+});
+
+new Vue({
+    el: '#root',
+    template: `<app-root></app-root>`
 });
