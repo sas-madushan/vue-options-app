@@ -42,12 +42,15 @@ Vue.component('option-item', {
         item: {
             type: [Object],
             required: true
+        },
+        removeOption: {
+            type: [Function]
         }
     },
     template: `
         <li>
             <p>{{ item.text }}</p>
-            <button>Remove</button>
+            <button v-on:click="removeOption(item.id)">Remove</button>
         </li>
     `
 });
@@ -58,15 +61,26 @@ Vue.component('options-view', {
         options: {
             type: [Array],
             required: true,
+        },
+        removeAllOptions: {
+            type: [Function]
+        },
+        removeOptionItem: {
+            type: [Function]
         }
     },
     template: `
         <div>
+            <div>
+                <h3>Your Options</h3>
+                <button v-on:click="removeAllOptions">Remove All</button>
+            </div>
             <ul>
                 <option-item 
                     v-for="option in options"
                     v-bind:key="option.id"
                     v-bind:item="option"
+                    v-bind:removeOption="removeOptionItem"
                 >
                 </option-item>
             </ul>
@@ -105,7 +119,9 @@ Vue.component('app-root', {
             <div>
                 <options-view 
                     v-bind:options="options"
-                    >
+                    v-bind:removeAllOptions="removeAllOptions"
+                    v-bind:removeOptionItem="removeOptionItem"
+                >
                 </options-view>
             </div>
             <div>
