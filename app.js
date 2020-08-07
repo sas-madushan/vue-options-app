@@ -1,3 +1,9 @@
+// error message component
+Vue.component('error-message', {
+    props: [],
+    template: `<span></span>`
+});
+
 // add option form component
 Vue.component('add-option', {
     props: {
@@ -110,6 +116,7 @@ Vue.component('app-root', {
                 </options>
             </div>
             <div>
+                <error-message></error-message>
                 <add-option
                     v-bind:text="optionText"
                     v-bind:addNewOption="addNewOption"
