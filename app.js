@@ -20,8 +20,8 @@ Vue.component('add-option', {
     },
     computed: {
         defaultOption: function () {
-            return this.option = ''
-        }
+            return this.option ? this.option : ''
+        },
     },
     methods: {
         handleOnChange: function (e) {
