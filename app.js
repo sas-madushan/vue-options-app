@@ -1,7 +1,11 @@
 // error message component
 Vue.component('error-message', {
-    props: [],
-    template: `<span></span>`
+    props: {
+        message: {
+            type: [String, undefined]
+        }
+    },
+    template: `<span>{{message}}</span>`
 });
 
 // add option form component
@@ -62,6 +66,9 @@ Vue.component('options', {
                 <h3></h3>
                 <button v-on:click="removeAllOptions">Remove All</button>
             </div>
+            <div>
+                <span v-if="list.length === 0">Please add an option to get started!</span>
+            </div>
             <ul>
                 <option-item 
                     v-for="item in list" 
@@ -100,6 +107,9 @@ Vue.component('app-root', {
         optionText: {
             type: [String]
         },
+        message: {
+            type: [String, undefined]
+        },
         addNewOption: {
             type: [Function]
         }
@@ -116,7 +126,7 @@ Vue.component('app-root', {
                 </options>
             </div>
             <div>
-                <error-message></error-message>
+                <error-message v-bind:message="message"></error-message>
                 <add-option
                     v-bind:text="optionText"
                     v-bind:addNewOption="addNewOption"
@@ -134,6 +144,7 @@ const root = new Vue({
             v-bind:options="options"
             v-bind:removeAllOptions="removeAllOptions"
             v-bind:removeOptionItem="removeOptionItem"
+            v-bind:message="error"
             v-bind:optionText="optionText"
             v-bind:addNewOption="addNewOption"
         >
